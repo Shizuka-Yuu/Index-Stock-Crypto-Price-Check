@@ -1,25 +1,20 @@
 # Index-Stock-Crypto-Price-Check
 
-├── css/
-│   └── style.css
-├── js/
-│   ├── tickers.js
-│   ├── chart-settings.js
-│   ├── dashboard.js
-│   ├── app-config.js
-│   ├── sheet-data-handler.js
-│   └── live-monitor.js
-├── index.html
-├── README.md
-└── task.md
+指数、株式、仮想通貨の価格をリアルタイム（または定期更新）でチェックするためのダッシュボードツールです。TradingViewウィジェットの統合や、スプレッドシートからの独自データ取得・描画機能を備えています。
 
-| **ファイル**                  | **役割要約**                                                                         |
-| ------------------------- | -------------------------------------------------------------------------------- |
-| **index.html**            | **構造の定義**。外部ライブラリ（Sortable, TradingView）の読み込みと、2つの表示エリア（Favorites/Market）の骨組みを提供 |
-| **style.css**             | **視覚と操作感の定義**                                                                    |
-| **tickers.js**            | シンボル（銘柄）管理。スプレッドシート（独自カード）銘柄の管理。                                                 |
-| **chart-settings.js**     | **データの生成と配置**。銘柄リストを基に、設定（シンプル/ミニ/リッチ）に応じたウィジェットをDOMとして動的に組み立て                   |
-| **dashboard.js**          | **永続化とインタラクション**。ドラッグ＆ドロップによる並び替えを監視し、その結果をLocalStorageへ保存                       |
-| **app-config.js**         | キャッシュ保存・削除。インポート/エクスポート                                                          |
-| **sheet-data-handler.js** | Worker（CSV）からデータ取得、パース、そしてCanvasへの描画を担当                                          |
-| **live-monitor.js**       | 画面の生存確認（タイマー）、市場判定、および定期fetchの管理を担当                                              |
+## 📁 プロジェクト構成
+
+```text
+├── css/
+│   └── style.css            # スタイル定義
+├── js/
+│   ├── tickers.js           # 銘柄・シンボル管理
+│   ├── chart-settings.js    # ウィジェット生成・DOM構築
+│   ├── dashboard.js         # 並び替え・ドラッグ＆ドロップ監視
+│   ├── app-config.js        # キャッシュ・設定のエクスポート/インポート
+│   ├── sheet-data-handler.js # スプレッドシートデータ取得・描画
+│   └── live-monitor.js      # 定期更新・市場判定管理
+├── index.html               # メインエントリ
+├── README.md                # プロジェクト説明書
+└── task.md                  # タスク管理
+🛠 各ファイルの役割ファイル役割の要約index.html構造の定義。外部ライブラリ（Sortable, TradingView）の読み込みと、2つの表示エリア（Favorites/Market）の骨組みを提供します。style.css視覚と操作感の定義。レスポンシブなレイアウトやUIのスタイルを管理します。tickers.jsシンボル（銘柄）管理。ダッシュボードに表示する銘柄リストや、スプレッドシート連携銘柄の定義を行います。chart-settings.jsデータの生成と配置。銘柄リストを基に、設定（シンプル/ミニ/リッチ）に応じたウィジェットをDOMとして動的に組み立てます。dashboard.js永続化とインタラクション。ドラッグ＆ドロップによる並び替えを監視し、その結果を LocalStorage へ保存します。app-config.js設定管理。キャッシュの保存・削除、設定データのインポート/エクスポートを担当します。sheet-data-handler.js外部データ連携。Worker（CSV）からのデータ取得、パース、およびCanvasへの描画を担当します。live-monitor.js状態管理。画面の生存確認（タイマー）、開場/閉場などの市場判定、および定期的なfetch処理を管理します。🚀 特徴動的なウィジェット生成: TradingViewの豊富なチャートを簡単に一覧表示。カスタマイズ可能な配置: Sortable.jsを利用した直感的なドラッグ＆ドロップ操作。独自データの統合: Googleスプレッドシート等の外部データを取得し、Canvasを用いてカスタム描画が可能。設定の可搬性: 設定ファイルのエクスポート機能により、異なる環境への移行もスムーズです。
