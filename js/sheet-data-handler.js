@@ -7,7 +7,7 @@ import { checkSingleCardStatus } from "./live-monitor.js";
 let sheetDataCache = {};
 let isWorkerDown = false; // Workerが死んでいるかどうかのフラグ
 let lastWorkerRetry = 0; // 最後にWorkerを試した時間
-const RETRY_INTERVAL = 5 * 60 * 1000; // 10分間はCSV固定
+const RETRY_INTERVAL = 5 * 60 * 1000; // 5分間はCSV固定
 
 const WORKER_URL = "https://market-data-backend.shizuka-y.workers.dev/";
 const CSV_URL =
@@ -16,14 +16,12 @@ const CSV_URL =
 export async function fetchSheetData() {
   const now = Date.now();
 
-  // 1. Workerが「死亡フラグ」立っていて、かつ10分以内なら最初からCSVへ
   if (isWorkerDown && now - lastWorkerRetry < RETRY_INTERVAL) {
     console.log("Worker is resting... Mode: CSV (Fallback)");
     await fetchFromCSV();
     return;
   }
 
-  // 2. Workerへのリクエスト（5秒タイムアウト付き）
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -50,11 +48,10 @@ export async function fetchSheetData() {
       }
     });
 
-    isWorkerDown = false; // 成功したのでフラグクリア
+    isWorkerDown = false;
     console.log("Data source: Workers (JSON)");
     window.dispatchEvent(new CustomEvent("sheetDataUpdated"));
   } catch (e) {
-    // 3. Worker死亡判定：フラグを立ててCSVモードへ
     isWorkerDown = true;
     lastWorkerRetry = now;
     console.warn("Worker failure detected. Switching to CSV for 10 minutes.");
@@ -62,7 +59,6 @@ export async function fetchSheetData() {
   }
 }
 
-// バックアップ：公開CSVからの取得ロジック
 async function fetchFromCSV() {
   try {
     const csvRes = await fetch(CSV_URL);
@@ -98,44 +94,26 @@ export function renderSheetContent(container, item, theme) {
   const data = sheetDataCache[item.name];
   if (!data) return;
 
-  // fetchSheetDataで格納した順番で取り出す
   const [name, symbol, price, close, chgVal, chgPct, historyStr, timestamp] =
     data;
 
+  // 既存のコンテナを探す
   let contentWrapper = container.querySelector(".sheet-card-inner-content");
-  let oldPrice = null;
 
-  // 既存のコンテナ生成ロジック
+  // 重要：前回の価格を dataset から取得
+  const lastPrice = contentWrapper ? contentWrapper.dataset.lastRawPrice : null;
+
   if (!contentWrapper) {
     contentWrapper = document.createElement("div");
     contentWrapper.className = "sheet-card-inner-content csv-data-present";
     contentWrapper.style.cssText = `padding:12px;height:100%;display:flex;flex-direction:column;justify-content:space-between;box-sizing:border-box;pointer-events:none;`;
     container.appendChild(contentWrapper);
-  } else {
-    const priceEl = contentWrapper.querySelector(".price-val");
-    if (priceEl) oldPrice = priceEl.innerText;
   }
-
-  contentWrapper.dataset.timestamp = timestamp;
-
-  if (!contentWrapper) {
-    contentWrapper = document.createElement("div");
-    contentWrapper.className = "sheet-card-inner-content csv-data-present";
-    // ... スタイル設定 ...
-    container.appendChild(contentWrapper);
-  }
-
-  // --- ここを追加：保存時に識別できるように属性を付与 ---
-  contentWrapper.dataset.tickerName = item.name; // 例: "BTCJPY"
-  contentWrapper.dataset.symbol = item.symbol; // 例: "BINANCE:BTCJPY"
-  contentWrapper.dataset.view = item.view; // 例: "rich"
-  // ------------------------------------------------
 
   const isUp = parseFloat(chgVal) >= 0;
   const color = isUp ? "#089981" : "#f23645";
   const textColor = theme === "light" ? "#131722" : "#d1d4dc";
 
-  // --- 価格の小数点以下を小さく整形する内部関数 ---
   const formatPriceHTML = (priceStr) => {
     if (!priceStr || !priceStr.includes(".")) return priceStr;
     const [integer, fraction] = priceStr.split(".");
@@ -144,10 +122,29 @@ export function renderSheetContent(container, item, theme) {
 
   const formattedPrice = formatPriceHTML(price);
 
-  // 内部HTMLの更新
+  // フラッシュ判定（生数値文字列の比較）
+  let flashType = null;
+  if (lastPrice && lastPrice !== price) {
+    const vOld = parseFloat(lastPrice.replace(/,/g, ""));
+    const vNew = parseFloat(price.replace(/,/g, ""));
+    if (vNew > vOld) flashType = "up";
+    else if (vNew < vOld) flashType = "down";
+    console.log(
+      `Flash Triggered: ${name} | Old: ${vOld} | New: ${vNew} | Type: ${flashType}`,
+    );
+  }
+
+  // 状態の保存
+  contentWrapper.dataset.lastRawPrice = price;
+  contentWrapper.dataset.timestamp = timestamp;
+  contentWrapper.dataset.tickerName = item.name;
+  contentWrapper.dataset.symbol = item.symbol;
+  contentWrapper.dataset.view = item.view;
+
+  // HTML更新（transitionをインラインから削除）
   contentWrapper.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div class="price-val" style="font-size:1.5rem;font-weight:bold;color:${textColor};transition:color 0.3s ease;">${formattedPrice}</div>
+        <div class="price-val" style="font-size:1.5rem;font-weight:bold;color:${textColor};">${formattedPrice}</div>
         <div style="text-align:right;line-height:1.2;">
             <div style="color:${color};font-size:0.85rem;font-weight:bold;">${isUp ? "▲" : "▼"} ${Math.abs(chgVal)}</div>
             <div style="color:${color};font-size:0.85rem;font-weight:bold;">${chgPct}</div>
@@ -167,19 +164,16 @@ export function renderSheetContent(container, item, theme) {
         </div>
     </div>`;
 
-  // --- 価格フラッシュ判定 ---
-  const newPriceEl = contentWrapper.querySelector(".price-val");
-  if (oldPrice && oldPrice !== price) {
-    const valOld = parseFloat(oldPrice.replace(/,/g, ""));
-    const valNew = parseFloat(price.replace(/,/g, ""));
-    if (valNew > valOld) {
-      flashPriceColor(newPriceEl, "#089981", textColor);
-    } else if (valNew < valOld) {
-      flashPriceColor(newPriceEl, "#f23645", textColor);
-    }
+  // フラッシュの実行
+  if (flashType) {
+    const flashColor = flashType === "up" ? "#089981" : "#f23645";
+    // 確実に要素が配置されるのを待つ
+    requestAnimationFrame(() => {
+      const newPriceEl = contentWrapper.querySelector(".price-val");
+      flashPriceColor(newPriceEl, flashColor, textColor);
+    });
   }
 
-  // グレーアウト判定
   checkSingleCardStatus(contentWrapper);
 
   if (historyStr) {
@@ -195,23 +189,20 @@ export function renderSheetContent(container, item, theme) {
   }
 }
 
-/**
- * 価格の色を一瞬変えて戻す（1.5秒かけて戻る設定）
- */
 function flashPriceColor(el, flashColor, originalColor) {
-  el.style.transition = "none";
-  el.style.color = flashColor;
+  if (!el) return;
 
+  // 1. transitionを完全に無効化し、即座にフラッシュ色に変える
+  el.style.setProperty("transition", "none", "important");
+  el.style.setProperty("color", flashColor, "important");
+
+  // 2. 2秒後に、再びtransitionなしで元の色にパッと戻す
   setTimeout(() => {
-    el.style.transition = "color 2s ease"; // 1.5秒かけてゆっくり戻る
-    el.style.color = originalColor;
-  }, 100);
+    el.style.setProperty("transition", "none", "important");
+    el.style.setProperty("color", originalColor, "important");
+  }, 1000); // 1秒間維持
 }
 
-/**
- * Canvasへの描画ロジック（補助関数）
- * ※既存のデザインを維持
- */
 function renderSparkline(canvas, data, color) {
   const ctx = canvas.getContext("2d");
   const dpr = window.devicePixelRatio || 1;

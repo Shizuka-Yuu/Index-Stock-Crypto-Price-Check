@@ -93,4 +93,10 @@ const tickers = [
     type: "sheet",
     symbol: "rates-bonds/japan-30-year-bond-yield",
   },
+  {
+    id: "sheet_btcusd",
+    name: "BTCUSD",
+    type: "sheet",
+    symbol: "BTC-USD",
+  },
 ];

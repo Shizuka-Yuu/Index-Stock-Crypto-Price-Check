@@ -359,3 +359,9 @@ body.is-dragging-active {
 .sheet-card-inner-content.market-closed .fetch-progress-bar {
   opacity: 0 !important;
 }
+
+/* style.css の末尾 */
+.price-val {
+  /* ここには transition を書かないか、ごく短いものにする */
+  transition: color 0.3s ease;
+}
