@@ -6,17 +6,17 @@
 
 ```text
 ├── css/
-│   └── style.css            # スタイル定義
+│   └── style.css             # スタイル定義
 ├── js/
-│   ├── tickers.js           # 銘柄・シンボル管理
-│   ├── chart-settings.js    # ウィジェット生成・DOM構築
-│   ├── dashboard.js         # 並び替え・ドラッグ＆ドロップ監視
-│   ├── app-config.js        # キャッシュ・設定のエクスポート/インポート
+│   ├── tickers.js            # 銘柄・シンボル管理
+│   ├── chart-settings.js     # ウィジェット生成・DOM構築
+│   ├── dashboard.js          # 並び替え・ドラッグ＆ドロップ監視
+│   ├── app-config.js         # キャッシュ・設定のエクスポート/インポート
 │   ├── sheet-data-handler.js # スプレッドシートデータ取得・描画
-│   └── live-monitor.js      # 定期更新・市場判定管理
-├── index.html               # メインエントリ
-├── README.md                # プロジェクト説明書
-└── task.md                  # タスク管理
+│   └── live-monitor.js       # 定期更新・市場判定管理
+├── index.html                # メインエントリ
+├── README.md                 # プロジェクト説明書
+└── task.md                   # タスク管理
 ````
 ---
 
