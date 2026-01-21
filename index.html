@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Market Dashboard</title>
+    <link rel="stylesheet" href="css/style.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <script src="js/tickers.js"></script>
+
+    <script type="module">
+      import {
+        fetchSheetData,
+        renderSheetContent,
+      } from "./js/sheet-data-handler.js";
+      import { initLiveMonitor } from "./js/live-monitor.js";
+
+      // 従来のスクリプトから呼べるようにグローバルに公開
+      window.fetchSheetData = fetchSheetData;
+      window.renderSheetContent = renderSheetContent;
+      window.initLiveMonitor = initLiveMonitor;
+    </script>
+
+    <script src="js/chart-settings.js"></script>
+    <script src="js/app-config.js"></script>
+    <script src="js/dashboard.js"></script>
+
+    <script>
+      window.addEventListener("load", async () => {
+        if (window.initLiveMonitor) {
+          window.initLiveMonitor();
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div class="header-controls">
+      <div class="mode-selector">
+        <button id="btn-open-settings">⚙️ 設定</button>
+        <button id="btn-single" onclick="changeMode('single')">
+          Single View
+        </button>
+        <button id="btn-simple" onclick="changeMode('simple')">
+          Mini View
+        </button>
+        <button id="btn-rich" onclick="changeMode('rich')">Rich View</button>
+      </div>
+
+      <div
+        class="right-controls"
+        style="display: flex; gap: 8px; margin-left: auto"
+      >
+        <div class="theme-selector">
+          <button
+            id="btn-theme-toggle"
+            onclick="toggleTheme()"
+            title="Toggle Dark/Light Mode"
+          >
+            🌓
+          </button>
+        </div>
+        <div class="lang-selector">
+          <button id="btn-ja" onclick="changeLang('ja')">JP</button>
+          <button id="btn-en" onclick="changeLang('en')">EN</button>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Favorites</h2>
+    <div id="favorite-grid" class="grid"></div>
+
+    <h2 class="section-title">Market Overview</h2>
+    <div id="chart-grid" class="grid"></div>
+
+    <div id="settings-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>銘柄の追加</h3>
+          <span id="btn-close-modal" class="close-x">&times;</span>
+        </div>
+
+        <div class="modal-body">
+          <div class="input-group">
+            <label>表示名</label>
+            <input type="text" id="new-ticker-name" placeholder="例: トヨタ" />
+          </div>
+          <div class="input-group">
+            <label>シンボル</label>
+            <input
+              type="text"
+              id="new-ticker-symbol"
+              placeholder="例: TSE:7203"
+            />
+          </div>
+          <div class="input-group">
+            <label>スタイル</label>
+            <select id="new-ticker-view">
+              <option value="single">Single Ticker (バッジ型)</option>
+              <option value="simple">Mini Chart (シンプル)</option>
+              <option value="rich">Rich Detail (詳細)</option>
+            </select>
+          </div>
+          <button id="add-ticker-btn" class="primary-btn">
+            ダッシュボードに追加
+          </button>
+
+          <hr class="modal-divider" />
+
+          <div class="setting-item">
+            <p style="font-weight: bold; font-size: 0.9rem; margin-bottom: 8px">
+              レイアウト管理
+            </p>
+            <div style="display: flex; align-items: center; gap: 10px">
+              <button
+                id="btn-save-layout"
+                class="primary-btn"
+                style="background: #2a2e39; flex: 1"
+              >
+                現在の配置を保存
+              </button>
+              <span
+                id="save-status-msg"
+                style="font-size: 11px; color: #089981; display: none"
+                >Saved!</span
+              >
+            </div>
+          </div>
+
+          <div
+            class="setting-item"
+            style="
+              border-top: 1px solid #444;
+              padding-top: 15px;
+              margin-top: 15px;
+            "
+          >
+            <p style="font-weight: bold; font-size: 0.9rem; margin-bottom: 8px">
+              データのバックアップ
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <button
+                id="btn-export-json"
+                class="primary-btn"
+                style="background: #2a2e39"
+              >
+                設定をファイルに書き出す
+              </button>
+
+              <button
+                id="btn-import-trigger"
+                class="primary-btn"
+                style="background: #2a2e39"
+              >
+                ファイルから読み込む
+              </button>
+              <input
+                type="file"
+                id="input-import-json"
+                accept=".json"
+                style="display: none"
+              />
+            </div>
+          </div>
+
+          <hr class="modal-divider" />
+
+          <div class="danger-zone">
+            <p>システム設定</p>
+            <button id="reset-all-btn" class="reset-btn">
+              全てのキャッシュを初期化
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

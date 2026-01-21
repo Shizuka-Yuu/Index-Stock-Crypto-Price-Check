@@ -1,0 +1,361 @@
+/* style.css */
+/* --- カラー変数定義 --- */
+:root {
+  --bg-main: #131722;
+  --bg-card: #000000;
+  --bg-header: #2a2e39;
+  --border-main: #363c4e;
+  --border-hover: #434651;
+  --text-muted: #9db2bd;
+  --text-bright: #d1d4dc;
+  --accent-blue: #2962ff;
+  --btn-bg: #2a2e39;
+  --modal-overlay: rgba(0, 0, 0, 0.7);
+  --guide-msg: #434651;
+  /* 基準線調整用の変数 */
+  --side-buffer: 8px; /* 画面端のバッファ */
+  --grid-offset: 12px; /* お気に入り枠(2px)+内余白(10px)の合計 */
+  --card-gap: 5px; /* カード同士の隙間（以前の半分） */
+}
+
+/* ライトモード定義 */
+body.light-mode {
+  --bg-main: #f2f5f8;
+  --bg-card: #ffffff;
+  --bg-header: #f0f3fa;
+  --border-main: #d1d4dc;
+  --border-hover: #b2b5be;
+  --text-muted: #434651;
+  --text-bright: #131722;
+  --accent-blue: #2962ff;
+  --btn-bg: #e0e3eb;
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --guide-msg: #787b86;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-bright);
+  margin: 0;
+  padding: 10px var(--side-buffer);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, Ubuntu,
+    sans-serif;
+  overflow-x: hidden;
+}
+
+/* ヘッダー：お気に入りエリアの枠線端にボタンを合わせる（外側の基準線） */
+.header-controls {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 30px;
+  padding: 10px 0;
+  box-sizing: border-box;
+  clear: both;
+}
+
+/* セクションタイトル：カードの面に合わせる（内側の基準線） */
+.section-title {
+  color: var(--text-bright);
+  font-size: 1.2rem;
+  padding-left: var(--grid-offset);
+  margin: 20px 0 10px 0;
+}
+
+/* --- グリッド設計：カラム上限設定 ＆ 横いっぱいに拡大 --- */
+.grid,
+#chart-grid,
+#favorite-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(max(205px, calc((100% - (var(--card-gap) * 7)) / 8)), 1fr)
+      /* 【運用メモ】設定は下記のいずれかを上記と置き換える
+       5カラム設定 minmax(max(205px, calc((100% - (var(--card-gap) * 4)) / 5)), 1fr)
+       8カラム設定 minmax(max(205px, calc((100% - (var(--card-gap) * 7)) / 8)), 1fr)
+      */
+  );
+  gap: var(--card-gap);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 3カラムを回避して2カラムへ移行する調整 */
+@media (max-width: 840px) {
+  .grid,
+  #chart-grid,
+  #favorite-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* お気に入りエリア（基準枠：外枠への隙間10pxを保持） */
+#favorite-grid {
+  min-height: 190px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 2px dashed var(--border-main);
+  border-radius: 8px;
+  padding: 10px; /* 外枠から中のカードまでの距離 */
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* 下のメイングリッド（枠なし・カード面を合わせる） */
+#chart-grid {
+  /* 枠(2px)+内余白(10px)の計12px分をパディングで確保 */
+  padding: 0 var(--grid-offset);
+}
+
+/* --- カード全体の基本設定 --- */
+.chart-box {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-main);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.chart-box {
+  height: 170px;
+}
+.chart-box.view-single {
+  height: 110px !important;
+}
+.chart-box.view-simple {
+  min-width: 180px !important; /* 押し上げ防止の最小幅 */
+  height: 180px !important;
+}
+.chart-box.view-rich {
+  height: 180px !important;
+}
+
+.chart-box:hover {
+  border-color: var(--border-hover);
+}
+
+/* --- ヘッダー部分 --- */
+.chart-header {
+  height: 22px;
+  line-height: 22px;
+  background: var(--bg-header);
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 0 8px;
+  cursor: grab;
+  position: relative;
+  z-index: 25;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* --- ウィジェット格納エリア --- */
+.widget-container {
+  position: relative;
+  flex: 1;
+  background: var(--bg-card);
+  cursor: pointer;
+  min-height: 0;
+  overflow: hidden;
+}
+
+tv-mini-chart,
+.widget-container iframe {
+  height: 100% !important;
+  width: 100% !important;
+  position: relative;
+}
+
+/* simpleview時の押し上げ回避ハック */
+.chart-box.view-simple .widget-container tv-mini-chart,
+.chart-box.view-simple .widget-container iframe {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: calc(100% + 40px) !important;
+  width: 100% !important;
+}
+
+.click-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background: transparent;
+}
+
+.delete-btn {
+  padding: 0 4px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #434651;
+  transition: color 0.2s;
+  margin-left: auto;
+  position: relative;
+  z-index: 30;
+}
+
+.delete-btn:hover {
+  color: #ff4a4a;
+}
+
+/* --- アニメーション・ドラッグ関連 --- */
+.fade-prepare {
+  opacity: 0;
+}
+.fade-in {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+
+body.is-dragging-active {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.sortable-fallback {
+  cursor: grabbing !important;
+  opacity: 0.9 !important;
+  background: #2a2e39 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid #2962ff !important;
+}
+.sortable-chosen .widget-container {
+  pointer-events: none;
+}
+.sortable-ghost {
+  opacity: 0.3;
+  background: #2962ff !important;
+}
+.is-dragging .widget-container {
+  visibility: hidden;
+}
+
+/* --- 空状態ガイド --- */
+.empty-guide {
+  display: grid !important;
+  min-height: 150px;
+  position: relative;
+}
+.empty-guide::before {
+  content: attr(data-guide-msg);
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--guide-msg);
+  font-size: 14px;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+/* --- セレクター・ボタン類 --- */
+.mode-selector,
+.lang-selector,
+.theme-selector {
+  display: flex;
+  gap: 10px;
+}
+.lang-selector {
+  margin-left: auto;
+}
+
+.mode-selector button,
+.lang-selector button,
+.theme-selector button {
+  background-color: var(--btn-bg);
+  color: var(--text-bright);
+  border: 1px solid var(--border-main);
+  padding: 5px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.mode-selector button.active,
+.lang-selector button.active {
+  background-color: var(--accent-blue) !important;
+  color: #ffffff !important;
+}
+
+/* --- モーダル --- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--modal-overlay);
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+.modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-bright);
+  background-color: var(--bg-card);
+  width: 90%;
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #363c4e;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.close-x {
+  font-size: 24px;
+  cursor: pointer;
+  color: #9db2bd;
+}
+.input-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.input-group label {
+  font-size: 12px;
+  color: #9db2bd;
+}
+.primary-btn {
+  width: 100%;
+  background: #2962ff;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* スパークラインのキャンバスだけを暗く、白黒にする */
+.sheet-card-inner-content.market-closed .sparkline-canvas {
+  opacity: 0.5;
+  filter: grayscale(1);
+  transition: all 0.5s ease;
+}
+
+/* 閉場中のプログレスバーは進行を見せない（透明にする、あるいは色を変える） */
+.sheet-card-inner-content.market-closed .fetch-progress-bar {
+  opacity: 0 !important;
+}
