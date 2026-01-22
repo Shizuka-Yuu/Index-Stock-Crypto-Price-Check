@@ -165,4 +165,10 @@ const tickers = [
     type: "sheet",
     symbol: "/commodities/copper",
   },
+  {
+    id: "sheet_sp500vix",
+    name: "S&P 500 VIX",
+    type: "sheet",
+    symbol: "/indices/volatility-s-p-500",
+  },
 ];
