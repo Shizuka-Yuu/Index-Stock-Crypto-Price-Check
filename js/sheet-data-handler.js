@@ -196,11 +196,11 @@ function flashPriceColor(el, flashColor, originalColor) {
   el.style.setProperty("transition", "none", "important");
   el.style.setProperty("color", flashColor, "important");
 
-  // 2. 2秒後に、再びtransitionなしで元の色にパッと戻す
+  // 2. 0.5秒後に、再びtransitionなしで元の色にパッと戻す
   setTimeout(() => {
     el.style.setProperty("transition", "none", "important");
     el.style.setProperty("color", originalColor, "important");
-  }, 1000); // 1秒間維持
+  }, 500); // 0.5秒間維持
 }
 
 function renderSparkline(canvas, data, color) {

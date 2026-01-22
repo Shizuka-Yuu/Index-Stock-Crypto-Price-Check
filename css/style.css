@@ -71,7 +71,7 @@ body {
   display: grid;
   grid-template-columns: repeat(
     auto-fill,
-    minmax(max(205px, calc((100% - (var(--card-gap) * 7)) / 8)), 1fr)
+    minmax(max(205px, calc((100% - (var(--card-gap) * 4)) / 5)), 1fr)
       /* 【運用メモ】設定は下記のいずれかを上記と置き換える
        5カラム設定 minmax(max(205px, calc((100% - (var(--card-gap) * 4)) / 5)), 1fr)
        8カラム設定 minmax(max(205px, calc((100% - (var(--card-gap) * 7)) / 8)), 1fr)
