@@ -64,31 +64,33 @@ body {
   margin: 20px 0 10px 0;
 }
 
-/* --- グリッド設計：カラム上限設定 ＆ 横いっぱいに拡大 --- */
+/* 基本設定（モバイル：最小2カラム） */
 .grid,
 #chart-grid,
 #favorite-grid {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(max(205px, calc((100% - (var(--card-gap) * 4)) / 5)), 1fr)
-      /* 【運用メモ】設定は下記のいずれかを上記と置き換える
-       5カラム設定 minmax(max(205px, calc((100% - (var(--card-gap) * 4)) / 5)), 1fr)
-       8カラム設定 minmax(max(205px, calc((100% - (var(--card-gap) * 7)) / 8)), 1fr)
-      */
-  );
   gap: var(--card-gap);
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  /* デフォルトは2カラム */
+  grid-template-columns: repeat(2, 1fr);
 }
 
-/* 3カラムを回避して2カラムへ移行する調整 */
-@media (max-width: 840px) {
+/* 中間：5カラム（タブレット・ノートPC等） */
+@media (min-width: 840px) {
   .grid,
   #chart-grid,
   #favorite-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    /* 5カラム固定 */
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* 最大：10カラム（FHDなどの大画面） */
+/* 1600px〜1920px程度で切り替え */
+@media (min-width: 1600px) {
+  .grid,
+  #chart-grid,
+  #favorite-grid {
+    grid-template-columns: repeat(10, 1fr);
   }
 }
 
@@ -128,8 +130,8 @@ body {
   height: 110px !important;
 }
 .chart-box.view-simple {
-  min-width: 180px !important; /* 押し上げ防止の最小幅 */
-  height: 180px !important;
+  /*min-width: 180px !important; /* 押し上げ防止の最小幅 */
+  height: 170px !important;
 }
 .chart-box.view-rich {
   height: 180px !important;
