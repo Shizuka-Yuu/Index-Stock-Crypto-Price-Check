@@ -10,7 +10,6 @@ const tickers = [
   { id: "aapl", name: "AAPL", symbol: "NASDAQ:AAPL" },
   { id: "tsla", name: "TSLA", symbol: "NASDAQ:TSLA" },
   { id: "msft", name: "MSFT", symbol: "NASDAQ:MSFT" },
-  { id: "sox", name: "SOX", symbol: "NASDAQ:SOX" },
   { id: "sony", name: "SONY", symbol: "NYSE:SONY" },
   { id: "btc", name: "BTC", symbol: "BINANCE:BTCUSDT" },
   { id: "vix", name: "VIX(Future)", symbol: "CAPITALCOM:VIX" },
@@ -170,5 +169,11 @@ const tickers = [
     name: "S&P 500 VIX",
     type: "sheet",
     symbol: "/indices/volatility-s-p-500",
+  },
+  {
+    id: "sheet_phlxsemiconductor",
+    name: "PHLX Semiconductor",
+    type: "sheet",
+    symbol: "/indices/phlx-semiconductor",
   },
 ];
